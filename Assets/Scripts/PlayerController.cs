@@ -6,10 +6,21 @@ public class PlayerController : MonoBehaviour
 {
     public float rotationSpeed = 100f;
     public float flySpeed = 5f;
+    //odniesienie do menadzera poziomu
+    GameObject levelManagerObject;
+    //stan osłon w % (1=100%)
+    float shieldCapacity = 1;
+    
+
+
+
+
+
+
     // Start is called before the first frame update
     void Start()
     {
-        
+        levelManagerObject = GameObject.Find("LevelManager");
     }
 
     // Update is called once per frame
@@ -53,18 +64,50 @@ public class PlayerController : MonoBehaviour
         //dodaj obrót do obiektu
         //nie możemy użyć += ponieważ unity używa Quaternionów do zapisu rotacji
         transform.Rotate(rotation);
+        UpdateUI();
 
 
 
+    }
+    private void UpdateUI()
+    {
+        //metoda wykonuje wszystko związane z aktualizacją interfejsu uzytkownika
+        Vector3 target = levelManagerObject.GetComponent<LevelManager>().exitPosition;
+        //obróc znacznik w strone wyjscia
+        transform.Find("NavUI").Find("TargetMarker").LookAt(target);
+        //zmień ilość % widoczną w interfejsie
+        //TextMeshProUGUI shieldText = 
+            //GameObject.Find("Canvas").transform.Find("ShieldCapacityText").GetComponent<TextMeshProUGUI>();
+        //shieldText.text = " Shield: " + (shieldCapacity*100).ToString() + "%";
+
+        //sprawdzamy czy poziom sie zakończył i czy musimy wyświetlić ekran końcowy
+        if(levelManagerObject.GetComponent<LevelManager>().levelComplete)
+        {
+            GameObject.Find("Canvas.").transform.Find("LevelCompleteScreen").gameObject.SetActive(true);
+        }
+       
     }
     private void OnCollisionEnter(Collision collision)
     {
         if(collision.collider.transform.CompareTag("Asteroid"))
         {
-            Debug.Log("Boom!");
-            //pauza
-            Time.timeScale = 0;
+            //transform asteroidy
+            Transform asteroid = collision.collider.transform;
+            //policz vector według którego odepchniemy asteroide
+            Vector3 shieldForce = asteroid.position - transform.position;
+            //popchnij asteroide
+            asteroid.GetComponent<Rigidbody>().AddForce(shieldForce * 5, ForceMode.Impulse);
+            shieldCapacity -= 0.25f;
         }
 
+    }
+    private void OnTriggerEnter(Collider other)
+    {
+        //jezeli dotkniemy znacznika końca poziomu to ustaw w levelmenager flagę, że poziom jest ukończony
+        if(other.transform.CompareTag("LevelExit"))
+        {
+            //z
+            levelManagerObject.GetComponent<LevelManager>().levelComplete = true;
+        }
     }
 }
