@@ -83,7 +83,7 @@ public class PlayerController : MonoBehaviour
         //sprawdzamy czy poziom sie zakończył i czy musimy wyświetlić ekran końcowy
         if(levelManagerObject.GetComponent<LevelManager>().levelComplete)
         {
-            GameObject.Find("Canvas.").transform.Find("LevelCompleteScreen").gameObject.SetActive(true);
+            GameObject.Find("Canvas").transform.Find("LevelCompleteScreen").gameObject.SetActive(true);
         }
        
     }
